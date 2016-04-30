@@ -5,9 +5,13 @@ import configureStore from './store/configureStore';
 const store = configureStore();
 const render = createApp(document.getElementById('root'), store.dispatch);
 
-render(<App />, store.getState());
+function update(App, context) {
+  render(<App />, context);
+}
+
+update(App, store.getState());
 
 store.subscribe(() => {
-  render(<App />, store.getState());
+  update(App, store.getState());
 });
 
