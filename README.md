@@ -31,7 +31,7 @@ npm run build
 ## Under the hood
 
 * [x] [Deku 2.0.0](https://github.com/dekujs/deku)
-* [ ] [Hot Module Replacement](http://dekujs.github.io/deku/docs/advanced/hmr.html)
+* [x] [Hot Module Replacement](http://dekujs.github.io/deku/docs/advanced/hmr.html)
 * [x] [Redux](https://github.com/reactjs/redux)
 * [x] [Redux Thunk middleware](https://github.com/gaearon/redux-thunk)
 * [x] [Webpack](https://github.com/webpack/webpack)
