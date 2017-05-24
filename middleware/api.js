@@ -1,7 +1,7 @@
 import fetch from 'isomorphic-fetch';
 
-function callApi() {
-  return fetch('http://localhost:3000/api.json')
+function callApi(endpoint) {
+  return fetch(`https://api.github.com/${endpoint}`)
     .then(response => response.json())
     .then(response => {
       const { error } = response;
@@ -19,7 +19,7 @@ export default () => next => action => {
     return next(action);
   }
 
-  const { types } = callApiOptions;
+  const { types, endpoint } = callApiOptions;
   const [ requestType, successType, failureType ] = types;
 
   function actionWith(data) {
@@ -30,13 +30,14 @@ export default () => next => action => {
 
   next(actionWith({ type: requestType }));
 
-  return callApi()
-    .then(response => next(actionWith({
-      type: successType,
-      response
+  return callApi(endpoint)
+    .then(payload => next(actionWith({
+      payload,
+      type: successType
     })))
-    .catch(error => next(actionWith({
-      type: failureType,
-      error
+    .catch(payload => next(actionWith({
+      payload,
+      error: true,
+      type: failureType
     })));
 };

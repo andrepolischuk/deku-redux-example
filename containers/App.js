@@ -1,37 +1,55 @@
 import { element } from 'deku';
-import { fetchApiIfNeeded } from '../actions';
+import { addUser, deleteUser, handleError } from '../actions';
 import styles from './App.css';
 
-function refetch(dispatch) {
+function submit(dispatch) {
   return event => {
+    const {value} = event.target.querySelector('input');
+
     event.preventDefault();
-    dispatch(fetchApiIfNeeded());
+
+    if (value) {
+      dispatch(addUser(value));
+    }
   };
 }
 
 function render({ context, dispatch }) {
-  const { isFetching, result } = context;
+  const { users, error, fetching } = context;
 
   return (
-    <div class={isFetching ? styles.fetching : styles.normal}>
-      {!result && isFetching
-        ? <h3>Loading...</h3>
-        : <h3>Hello world!</h3>
+    <div class={fetching ? styles.fetching : styles.normal}>
+      <form onSubmit={submit(dispatch)}>
+        <input
+          type="text"
+          placeholder="Type github username..."
+          tabindex="0"
+          autofocus />
+        <button type="submit">Add</button>
+      </form>
+      {error &&
+        <p class={styles.error}>
+          {error}&nbsp;
+          <button
+            type="button"
+            onClick={() => dispatch(handleError(null))}>
+            Close
+          </button>
+        </p>
       }
-      {!isFetching &&
-        <a href='#' onClick={refetch(dispatch)}>
-          Fetch
-        </a>
-      }
+      {users.map(user => (
+        <p>
+          <a href={user.html_url}>{user.name}</a>&nbsp;
+          <small>{user.login}</small>&nbsp;
+          <button onClick={() => dispatch(deleteUser(user.login))}>
+            Delete
+          </button>
+        </p>
+      ))}
     </div>
   );
 }
 
-function onCreate({ dispatch }) {
-  dispatch(fetchApiIfNeeded());
-}
-
 export default {
-  render,
-  onCreate
+  render
 };

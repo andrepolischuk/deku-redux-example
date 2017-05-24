@@ -3,44 +3,56 @@ import nock from 'nock';
 import configureStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import api from '../middleware/api';
-import { fetchApiIfNeeded, API_REQUEST, API_SUCCESS, API_FAILURE  } from '../actions';
+import { initialState } from '../reducers';
+
+import {
+  FETCH_USER_REQUEST,
+  FETCH_USER_SUCCESS,
+  FETCH_USER_FAILURE,
+  DELETE_USER,
+  HANDLE_ERROR,
+  addUser,
+  deleteUser,
+  handleError
+} from '../actions';
 
 const mockStore = configureStore([ thunk, api ]);
 
-test.afterEach(() => {
-  nock.cleanAll();
+test('add user', async t => {
+  const store = mockStore(initialState);
+
+  await store.dispatch(addUser('andrepolischuk'));
+
+  t.is(store.getActions()[0].type, FETCH_USER_REQUEST);
+  t.is(store.getActions()[1].type, FETCH_USER_SUCCESS);
+  t.is(store.getActions()[1].payload.login, 'andrepolischuk');
 });
 
-test('success fetch api', async t => {
-  const store = mockStore({});
+test('delete user', async t => {
+  const store = mockStore(initialState);
 
-  nock('http://localhost:3000')
-    .get('/api.json')
-    .reply(200, {
-      result: true
-    });
+  await store.dispatch(addUser('andrepolischuk'));
+  store.dispatch(deleteUser('andrepolischuk'));
 
-  await store.dispatch(fetchApiIfNeeded());
-
-  t.deepEqual(store.getActions(), [
-    { type: API_REQUEST },
-    { type: API_SUCCESS, response: { result: true } }
-  ]);
+  t.deepEqual(store.getActions()[2], {
+    type: DELETE_USER,
+    payload: {
+      login: 'andrepolischuk'
+    }
+  });
 });
 
-test('failed fetch api', async t => {
-  const store = mockStore({});
+test('handle error', async t => {
+  const store = mockStore(initialState);
 
-  nock('http://localhost:3000')
-    .get('/api.json')
-    .reply(200, {
-      error: true
-    });
-
-  await store.dispatch(fetchApiIfNeeded());
+  store.dispatch(handleError('Error'));
 
   t.deepEqual(store.getActions(), [
-    { type: API_REQUEST },
-    { type: API_FAILURE, error: true }
+    {
+      type: HANDLE_ERROR,
+      payload: {
+        error: 'Error'
+      }
+    }
   ]);
 });

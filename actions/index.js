@@ -1,22 +1,52 @@
 import { CALL_API } from '../middleware/api';
 
-export const API_REQUEST = 'API_REQUEST';
-export const API_SUCCESS = 'API_SUCCESS';
-export const API_FAILURE = 'API_FAILURE';
+export const FETCH_USER_REQUEST = 'FETCH_USER_REQUEST';
+export const FETCH_USER_SUCCESS = 'FETCH_USER_SUCCESS';
+export const FETCH_USER_FAILURE = 'FETCH_USER_FAILURE';
 
-function fetchApi() {
+function fetchUser(endpoint) {
   return {
     [CALL_API]: {
-      types: [ API_REQUEST, API_SUCCESS, API_FAILURE ]
+      types: [
+        FETCH_USER_REQUEST,
+        FETCH_USER_SUCCESS,
+        FETCH_USER_FAILURE
+      ],
+      endpoint
     }
   };
 }
 
-function shouldFetchApi(state) {
-  return !state.isFetching;
+export function addUser(login) {
+  return (dispatch, getState) => {
+    const exists = getState().users.find(us => us.login === login);
+
+    if (exists) {
+      return dispatch(handleError(`${login} already exists`));
+    }
+
+    return dispatch(fetchUser(`users/${login}`));
+  };
 }
 
-export function fetchApiIfNeeded() {
-  return (dispatch, getState) =>
-    shouldFetchApi(getState()) && dispatch(fetchApi());
+export const DELETE_USER = 'DELETE_USER';
+
+export function deleteUser(login) {
+  return {
+    type: DELETE_USER,
+    payload: {
+      login
+    }
+  };
+}
+
+export const HANDLE_ERROR = 'HANDLE_ERROR';
+
+export function handleError(error) {
+  return {
+    type: HANDLE_ERROR,
+    payload: {
+      error
+    }
+  };
 }

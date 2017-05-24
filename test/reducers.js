@@ -1,38 +1,83 @@
 import test from 'ava';
-import reducer from '../reducers';
-import { API_REQUEST, API_SUCCESS, API_FAILURE } from '../actions';
+import reducer, { initialState } from '../reducers';
+
+import {
+  FETCH_USER_REQUEST,
+  FETCH_USER_SUCCESS,
+  FETCH_USER_FAILURE,
+  DELETE_USER,
+  HANDLE_ERROR
+} from '../actions';
 
 test('return the initial state', t => {
-  t.deepEqual(reducer(undefined, {}), {
-    isFetching: false,
-    result: null
+  t.deepEqual(reducer(undefined, {}), initialState);
+});
+
+test('handle FETCH_USER_REQUEST', t => {
+  t.deepEqual(reducer(initialState, {
+    type: FETCH_USER_REQUEST
+  }), {
+    ...initialState,
+    fetching: true
   });
 });
 
-test('handle API_REQUEST', t => {
-  t.deepEqual(reducer({}, {
-    type: API_REQUEST
+test('handle FETCH_USER_SUCCESS', t => {
+  t.deepEqual(reducer({
+    ...initialState,
+    fetching: true
+  }, {
+    type: FETCH_USER_SUCCESS,
+    payload: {
+      login: 'andrepolischuk'
+    }
   }), {
-    isFetching: true
+    ...initialState,
+    fetching: false,
+    users: [
+      {
+        login: 'andrepolischuk'
+      }
+    ]
   });
 });
 
-test('handle API_SUCCESS', t => {
-  t.deepEqual(reducer({ isFetching: true }, {
-    type: API_SUCCESS,
-    result: true
+test('handle FETCH_USER_FAILURE', t => {
+  t.deepEqual(reducer({
+    ...initialState,
+    fetching: true
+  }, {
+    type: FETCH_USER_FAILURE
   }), {
-    isFetching: false,
-    result: true
+    ...initialState,
+    fetching: false
   });
 });
 
-test('handle API_FAILURE', t => {
-  t.deepEqual(reducer({ isFetching: true }, {
-    type: API_FAILURE,
-    error: true
+test('handle DELETE_USER', t => {
+  t.deepEqual(reducer({
+    ...initialState,
+    users: [
+      {
+        login: 'andrepolischuk'
+      }
+    ]
+  }, {
+    type: DELETE_USER,
+    payload: {
+      login: 'andrepolischuk'
+    }
+  }), initialState);
+});
+
+test('handle HANDLE_ERROR', t => {
+  t.deepEqual(reducer(initialState,{
+    type: HANDLE_ERROR,
+    payload: {
+      error: 'Error'
+    }
   }), {
-    isFetching: false,
-    result: null
+    ...initialState,
+    error: 'Error'
   });
 });
